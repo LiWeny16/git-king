@@ -1,68 +1,121 @@
+/* Git King Design Tokens - Cupertino Industrial (see specs/UIUX.md) */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Semantic Colors - Light Mode */
+  --bg-canvas: #F5F5F7;
+  --bg-surface: #FFFFFF;
+  --bg-surface-glass: rgba(255, 255, 255, 0.72);
+  --bg-active: #F3F4F6;
+  --text-primary: #1D1D1F;
+  --text-secondary: #86868B;
+  --text-tertiary: #AEAEB2;
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --accent-primary: #007AFF;
+  --code-bg: #F6F8FA;
+
+  /* Shadow Elevation */
+  --shadow-level-1: 0px 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-level-2: 0px 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-level-3: 0px 20px 40px -10px rgba(0, 0, 0, 0.15);
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+[data-theme="dark"] {
+  --bg-canvas: #0D1117;
+  --bg-surface: #161B22;
+  --bg-surface-glass: rgba(22, 27, 34, 0.72);
+  --bg-active: #21262D;
+  --text-primary: #F0F6FC;
+  --text-secondary: #8B949E;
+  --text-tertiary: #6E7681;
+  --border-subtle: rgba(240, 246, 252, 0.1);
+  --accent-primary: #58A6FF;
+  --code-bg: #0D1117;
+
+  --shadow-level-1: 0px 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-level-2: 0px 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-level-3: 0px 20px 40px -10px rgba(0, 0, 0, 0.4);
 }
-a:hover {
-  color: #535bf2;
+
+/* Glassmorphism panel (iOS 毛玻璃) */
+.glass-panel {
+  background: var(--bg-surface-glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-subtle);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background-color: var(--bg-canvas);
+}
+
+#root {
   min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Scenario card flash highlight (deep link feedback) */
+@keyframes scenario-flash {
+  0%, 100% { background-color: transparent; }
+  25% { background-color: rgba(255, 193, 7, 0.35); }
+  75% { background-color: rgba(255, 193, 7, 0.2); }
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.scenario-card-flash {
+  animation: scenario-flash 1s ease-out;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* Flow Connector: 流程连接器 (specs/interaction.md §1) */
+.workflow-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.command-card-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.command-card-wrapper:not(:last-of-type)::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -24px;
+  width: 2px;
+  height: 24px;
+  background-color: var(--border-subtle);
+  transform: translateX(-50%);
+  z-index: 0;
+}
+
+.command-card-wrapper:not(:last-of-type)::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -28px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--text-secondary);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.15s ease-out;
 }

@@ -1,0 +1,76 @@
+/* Super Panel (Command+K) - specs/UIUX.md §3.1 */
+
+.command-palette {
+  width: 100%;
+}
+
+/* Item: padding 12px 16px */
+.command-palette [cmdk-item] {
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.command-palette [cmdk-item]:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+/* Active Item: accent-primary 背景 + 白字 (iOS 选中态) */
+.command-palette [cmdk-item][aria-selected="true"] {
+  background-color: var(--accent-primary, #007AFF) !important;
+  color: #fff !important;
+}
+
+.command-palette [cmdk-item][aria-selected="true"] .MuiTypography-root,
+.command-palette [cmdk-item][aria-selected="true"] [class*="MuiChip"] {
+  color: inherit !important;
+}
+
+.command-palette [cmdk-item][aria-selected="true"] .MuiChip-root {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+
+.command-palette [cmdk-item][aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Group Heading */
+.command-palette [cmdk-group-heading] {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary, #86868B);
+  letter-spacing: -0.3px;
+  user-select: none;
+}
+
+/* List scrollbar */
+.command-palette-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.command-palette-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.command-palette-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+.command-palette-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Dark mode */
+[data-theme="dark"] .command-palette [cmdk-item]:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .command-palette [cmdk-item][aria-selected="true"] {
+  background-color: var(--accent-primary, #58A6FF) !important;
+}

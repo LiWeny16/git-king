@@ -1,25 +1,32 @@
-import { useState } from 'react'
-import './App.css'
+import { useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
+import { MainLayout } from './components/layout';
+import { CommandPalette } from './components/common/Command';
+import { SettingsModal } from './components/feature/Settings';
+import { HomePage } from './components/feature/Home';
+import { useUIStore } from './store';
+import { initializeShortcuts, useShortcut } from './app/utils/shortcuts';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = observer(function App() {
+  const uiStore = useUIStore();
+
+  useEffect(() => {
+    return initializeShortcuts();
+  }, []);
+
+  useShortcut('openCommandPalette', () => {
+    uiStore.toggleCommandPalette();
+  });
 
   return (
-    <>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <MainLayout showSidebar={false} showHeader>
+      <CommandPalette />
+      <SettingsModal />
+      <HomePage />
+    </MainLayout>
+  );
+});
 
-export default App
+App.displayName = 'App';
+
+export default App;
