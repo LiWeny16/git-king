@@ -1,6 +1,5 @@
 import { Box, Stack, Typography } from '@mui/material';
-import { motion } from 'framer-motion';
-import { scenarioSectionIcons, itemVariants } from './constants';
+import { scenarioSectionIcons } from './constants';
 import { ScenarioCard } from './ScenarioCard';
 import type { ScenarioSection as ScenarioSectionType } from '../../../app/data/homeView';
 
