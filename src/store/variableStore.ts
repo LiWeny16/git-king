@@ -1,6 +1,6 @@
 // Variable/Form Data Store with MobX and Persistence
 // Stores user input for command variables (branch names, commit messages, etc.)
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, reaction } from 'mobx';
 import { makePersistable } from 'mobx-persist-store';
 
 export interface CommandVariable {
@@ -13,6 +13,9 @@ export class VariableStore {
   // Store command variables (e.g., branch names, commit messages)
   variables: Map<string, CommandVariable> = new Map();
 
+  /** 持久化的变量快照（Map 无法直接序列化），用于全局配置如用户名、邮箱等 */
+  variablesSnapshot: Record<string, string> = {};
+
   // Recent values for autocomplete
   recentBranchNames: string[] = [];
   recentCommitMessages: string[] = [];
@@ -24,10 +27,21 @@ export class VariableStore {
   constructor() {
     makeAutoObservable(this);
 
-    // Make store persistent
+    reaction(
+      () => this.variablesSnapshot,
+      (snap) => {
+        this.variables.clear();
+        if (snap && typeof snap === 'object')
+          for (const [k, v] of Object.entries(snap))
+            this.variables.set(k, { key: k, value: v, lastUsed: 0 });
+      },
+      { fireImmediately: true }
+    );
+
     makePersistable(this, {
       name: 'VariableStore',
       properties: [
+        'variablesSnapshot',
         'recentBranchNames',
         'recentCommitMessages',
         'recentTags',
@@ -44,6 +58,7 @@ export class VariableStore {
       value,
       lastUsed: Date.now(),
     });
+    this.variablesSnapshot = { ...this.variablesSnapshot, [key]: value };
   }
 
   getVariable(key: string): string | undefined {
@@ -52,10 +67,14 @@ export class VariableStore {
 
   deleteVariable(key: string) {
     this.variables.delete(key);
+    const next = { ...this.variablesSnapshot };
+    delete next[key];
+    this.variablesSnapshot = next;
   }
 
   clearVariables() {
     this.variables.clear();
+    this.variablesSnapshot = {};
   }
 
   // Branch name history
@@ -164,6 +183,7 @@ export class VariableStore {
   // Reset store
   reset() {
     this.variables.clear();
+    this.variablesSnapshot = {};
     this.recentBranchNames = [];
     this.recentCommitMessages = [];
     this.recentTags = [];

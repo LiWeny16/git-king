@@ -16,7 +16,6 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   IconButton,
-  alpha,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import KeyIcon from '@mui/icons-material/Key';
@@ -46,14 +45,14 @@ function SettingsSection({ title, children }: SettingsSectionProps) {
   return (
     <Box sx={{ mb: 3 }}>
       <Typography
-        variant="overline"
+        variant="caption"
         sx={{
           display: 'block',
-          px: 2,
-          py: 1,
+          mb: 1,
           color: 'text.secondary',
           fontWeight: 600,
-          letterSpacing: 1,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
         }}
       >
         {title}
@@ -61,10 +60,12 @@ function SettingsSection({ title, children }: SettingsSectionProps) {
       <Box
         sx={{
           bgcolor: 'background.paper',
-          borderRadius: 3,
+          borderRadius: 2,
           overflow: 'hidden',
-          border: 1,
+          border: '1px solid',
           borderColor: 'divider',
+          px: 2.5,
+          py: 1,
         }}
       >
         {children}
@@ -109,6 +110,9 @@ export const SettingsModal = observer(function SettingsModal() {
     uiStore.closeSettingsModal();
   };
 
+  // 与 Paper 圆角协调，内容明显内收不贴边（specs 布局约束）
+  const contentPadding = 4; // 32px
+
   return (
     <Dialog
       open={uiStore.isSettingsModalOpen}
@@ -117,25 +121,27 @@ export const SettingsModal = observer(function SettingsModal() {
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 4,
+          borderRadius: 3,
           bgcolor: 'background.default',
-          maxHeight: '80vh',
+          maxHeight: '85vh',
+          boxShadow: '0px 20px 40px -10px rgba(0, 0, 0, 0.12)',
         },
       }}
       sx={{
         zIndex: Z_INDEX.MODAL,
       }}
     >
-      {/* Header */}
+      {/* Header：与内容区同宽内收 */}
       <DialogTitle
         sx={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          px: contentPadding,
+          py: 2,
           borderBottom: 1,
           borderColor: 'divider',
-          bgcolor: (theme) => alpha(theme.palette.background.paper, 0.8),
-          backdropFilter: 'blur(20px)',
+          bgcolor: 'background.paper',
         }}
       >
         <Typography variant="h6" fontWeight={700}>
@@ -146,14 +152,14 @@ export const SettingsModal = observer(function SettingsModal() {
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ p: 2, bgcolor: 'background.default' }}>
+      <DialogContent sx={{ p: contentPadding, pt: 2.5, bgcolor: 'background.default' }}>
         {/* AI Configuration */}
         <SettingsSection title={CONFIG.sections.ai}>
           <List disablePadding>
-            <ListItem sx={{ flexDirection: 'column', alignItems: 'stretch', gap: 1.5, py: 2 }}>
+            <ListItem sx={{ flexDirection: 'column', alignItems: 'stretch', gap: 2, py: 2, px: 0 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <KeyIcon sx={{ color: 'primary.main' }} />
-                <Typography variant="body1" fontWeight={600}>
+                <KeyIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+                <Typography variant="subtitle2" fontWeight={600} color="text.primary">
                   OpenAI API Token
                 </Typography>
               </Box>
@@ -167,14 +173,16 @@ export const SettingsModal = observer(function SettingsModal() {
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     bgcolor: 'background.default',
+                    borderRadius: 1.5,
                   },
                 }}
               />
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 <Button
                   variant="text"
                   size="small"
                   onClick={() => setShowToken(!showToken)}
+                  sx={{ minWidth: 'auto', px: 1 }}
                 >
                   {showToken ? '隐藏' : '显示'}
                 </Button>
@@ -197,7 +205,7 @@ export const SettingsModal = observer(function SettingsModal() {
                   </Button>
                 )}
               </Box>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5 }}>
                 配置 API Token 后可启用 AI 增强功能，支持智能问答和命令生成。
               </Typography>
             </ListItem>
@@ -206,13 +214,15 @@ export const SettingsModal = observer(function SettingsModal() {
 
         {/* Appearance */}
         <SettingsSection title={CONFIG.sections.appearance}>
-          <List disablePadding>
-            <ListItem>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
-                <DarkModeIcon sx={{ color: 'text.secondary' }} />
+          <List disablePadding sx={{ py: 0.5 }}>
+            <ListItem sx={{ px: 0, py: 1.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
+                <DarkModeIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
                 <ListItemText
                   primary="深色模式"
                   secondary="切换应用主题"
+                  primaryTypographyProps={{ fontWeight: 500 }}
+                  secondaryTypographyProps={{ variant: 'caption' }}
                 />
               </Box>
               <ListItemSecondaryAction>
@@ -220,16 +230,19 @@ export const SettingsModal = observer(function SettingsModal() {
                   checked={uiStore.isDarkMode}
                   onChange={() => uiStore.toggleTheme()}
                   color="primary"
+                  size="medium"
                 />
               </ListItemSecondaryAction>
             </ListItem>
             <Divider component="li" />
-            <ListItem>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
-                <LanguageIcon sx={{ color: 'text.secondary' }} />
+            <ListItem sx={{ px: 0, py: 1.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
+                <LanguageIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
                 <ListItemText
                   primary="语言"
                   secondary="当前: 简体中文"
+                  primaryTypographyProps={{ fontWeight: 500 }}
+                  secondaryTypographyProps={{ variant: 'caption' }}
                 />
               </Box>
             </ListItem>
@@ -238,13 +251,15 @@ export const SettingsModal = observer(function SettingsModal() {
 
         {/* Data Management */}
         <SettingsSection title={CONFIG.sections.data}>
-          <List disablePadding>
-            <ListItem>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
-                <StorageIcon sx={{ color: 'text.secondary' }} />
+          <List disablePadding sx={{ py: 0.5 }}>
+            <ListItem sx={{ px: 0, py: 1.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
+                <StorageIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
                 <ListItemText
                   primary="清除本地数据"
                   secondary="删除所有仓库记录和配置"
+                  primaryTypographyProps={{ fontWeight: 500 }}
+                  secondaryTypographyProps={{ variant: 'caption' }}
                 />
               </Box>
               <ListItemSecondaryAction>
@@ -264,13 +279,14 @@ export const SettingsModal = observer(function SettingsModal() {
 
       <DialogActions
         sx={{
-          borderTop: 1,
+          borderTop: '1px solid',
           borderColor: 'divider',
-          px: 3,
+          px: contentPadding,
           py: 2,
+          gap: 1,
         }}
       >
-        <Button onClick={handleClose} variant="text">
+        <Button onClick={handleClose} variant="contained" color="primary">
           关闭
         </Button>
       </DialogActions>

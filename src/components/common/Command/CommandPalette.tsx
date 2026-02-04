@@ -4,11 +4,12 @@ import { observer } from 'mobx-react-lite';
 import { Command } from 'cmdk';
 import { motion } from 'framer-motion';
 import { Box, Paper, Typography, Chip, Stack } from '@mui/material';
-import { useUIStore } from '../../../store';
+import { useUIStore, useVariableStore } from '../../../store';
 import { GIT_COMMANDS } from '../../../app/data/commands';
 import { GIT_WORKFLOWS } from '../../../app/data/workflows';
 import { createCommandSearcher, createWorkflowSearcher, combinedSearch } from '../../../app/utils/search';
 import { copyToClipboard, copyWorkflowSteps } from '../../../app/utils/clipboard';
+import { substituteCommand } from '../../../app/utils/substituteCommand';
 import { Z_INDEX } from '../../../app/constants';
 import './CommandPalette.css';
 
@@ -27,7 +28,9 @@ const CONFIG = {
 
 export const CommandPalette = observer(() => {
   const uiStore = useUIStore();
+  const variableStore = useVariableStore();
   const [selectedItem, setSelectedItem] = useState<string>('');
+  const snapshot = variableStore.variablesSnapshot;
 
   // Create search instances
   const commandSearcher = useMemo(() => createCommandSearcher(GIT_COMMANDS), []);
@@ -53,7 +56,11 @@ export const CommandPalette = observer(() => {
       if (workflow) {
         uiStore.closeCommandPalette();
         uiStore.setHighlightScenarioId(workflow.id);
-        copyWorkflowSteps(workflow.steps).then(() => {
+        const substitutedSteps = workflow.steps.map((s) => ({
+          command: substituteCommand(s.command, snapshot),
+          description: s.description,
+        }));
+        copyWorkflowSteps(substitutedSteps).then(() => {
           uiStore.showSuccessToast(`已复制场景: ${workflow.title}`);
         });
       }
@@ -61,8 +68,9 @@ export const CommandPalette = observer(() => {
       const command = GIT_COMMANDS.find((c) => c.id === id);
       if (command) {
         uiStore.closeCommandPalette();
-        copyToClipboard(command.command).then(() => {
-          uiStore.showSuccessToast(`已复制: ${command.command}`);
+        const displayCommand = substituteCommand(command.command, snapshot);
+        copyToClipboard(displayCommand).then(() => {
+          uiStore.showSuccessToast(`已复制: ${displayCommand}`);
         });
       }
     } else {
@@ -100,9 +108,8 @@ export const CommandPalette = observer(() => {
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        paddingTop: '15vh',
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-        backdropFilter: 'blur(8px)',
+        paddingTop: '12vh',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
       onClick={() => uiStore.closeCommandPalette()}
     >
@@ -114,8 +121,8 @@ export const CommandPalette = observer(() => {
         elevation={0}
         sx={{
           width: '100%',
-          maxWidth: 640,
-          maxHeight: '60vh',
+          maxWidth: 720,
+          maxHeight: '75vh',
           overflow: 'hidden',
           borderRadius: 3,
           mx: 2,
@@ -131,7 +138,17 @@ export const CommandPalette = observer(() => {
           label="Command Palette"
           className="command-palette"
         >
-          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+          <Box
+            sx={{
+              px: 2.5,
+              py: 2,
+              borderBottom: 1,
+              borderColor: 'divider',
+              minHeight: 56,
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
             <Command.Input
               placeholder={CONFIG.placeholderText}
               value={uiStore.searchQuery}
@@ -141,18 +158,20 @@ export const CommandPalette = observer(() => {
                 width: '100%',
                 border: 'none',
                 outline: 'none',
-                fontSize: '18px',
+                fontSize: '17px',
                 fontFamily: 'inherit',
                 backgroundColor: 'transparent',
+                padding: 0,
+                lineHeight: 1.5,
               }}
             />
           </Box>
 
           <Command.List
             style={{
-              maxHeight: 'calc(60vh - 80px)',
+              maxHeight: 'calc(75vh - 88px)',
               overflow: 'auto',
-              padding: '8px',
+              padding: '12px',
             }}
             className="command-palette-list"
           >
@@ -222,50 +241,53 @@ export const CommandPalette = observer(() => {
             {/* Commands Section */}
             {searchResults.commands.length > 0 && (
               <Command.Group heading={CONFIG.categories.commands}>
-                {searchResults.commands.map((result) => (
-                  <Command.Item
-                    key={result.item.id}
-                    value={`command:${result.item.id}`}
-                    onSelect={() => handleSelect(`command:${result.item.id}`)}
-                  >
-                    <Stack spacing={1}>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily: 'monospace',
-                            fontWeight: 600,
-                            color: 'primary.main',
-                          }}
-                        >
-                          {result.item.command}
+                {searchResults.commands.map((result) => {
+                  const displayCommand = substituteCommand(result.item.command, snapshot);
+                  return (
+                    <Command.Item
+                      key={result.item.id}
+                      value={`command:${result.item.id}`}
+                      onSelect={() => handleSelect(`command:${result.item.id}`)}
+                    >
+                      <Stack spacing={1}>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: 'monospace',
+                              fontWeight: 600,
+                              color: 'primary.main',
+                            }}
+                          >
+                            {displayCommand}
+                          </Typography>
+                          {result.item.dangerous && (
+                            <Chip
+                              label="⚠️"
+                              size="small"
+                              color="error"
+                              sx={{ height: 20, fontSize: '11px' }}
+                            />
+                          )}
+                        </Stack>
+                        <Typography variant="body2" color="text.secondary">
+                          {result.item.description}
                         </Typography>
-                        {result.item.dangerous && (
-                          <Chip
-                            label="⚠️"
-                            size="small"
-                            color="error"
-                            sx={{ height: 20, fontSize: '11px' }}
-                          />
-                        )}
+                        <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                          {result.item.tags.slice(0, 3).map((tag) => (
+                            <Chip
+                              key={tag}
+                              label={tag}
+                              size="small"
+                              variant="outlined"
+                              sx={{ height: 18, fontSize: '10px' }}
+                            />
+                          ))}
+                        </Stack>
                       </Stack>
-                      <Typography variant="body2" color="text.secondary">
-                        {result.item.description}
-                      </Typography>
-                      <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                        {result.item.tags.slice(0, 3).map((tag) => (
-                          <Chip
-                            key={tag}
-                            label={tag}
-                            size="small"
-                            variant="outlined"
-                            sx={{ height: 18, fontSize: '10px' }}
-                          />
-                        ))}
-                      </Stack>
-                    </Stack>
-                  </Command.Item>
-                ))}
+                    </Command.Item>
+                  );
+                })}
               </Command.Group>
             )}
           </Command.List>

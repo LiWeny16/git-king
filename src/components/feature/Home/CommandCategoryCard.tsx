@@ -1,6 +1,9 @@
+import { observer } from 'mobx-react-lite';
 import { Card, CardContent, Divider, List, ListItem, ListItemText, Stack, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import { MONOSPACE_FONT } from '../../../config/theme';
+import { useVariableStore } from '../../../store';
+import { substituteCommand } from '../../../app/utils/substituteCommand';
 import type { CommandCategorySection } from '../../../app/data/homeView';
 
 interface CommandCategoryCardProps {
@@ -8,7 +11,10 @@ interface CommandCategoryCardProps {
   onCopyCommand: (text: string) => void;
 }
 
-export function CommandCategoryCard({ category, onCopyCommand }: CommandCategoryCardProps) {
+export const CommandCategoryCard = observer(function CommandCategoryCard({ category, onCopyCommand }: CommandCategoryCardProps) {
+  const variableStore = useVariableStore();
+  const snapshot = variableStore.variablesSnapshot;
+
   return (
     <Card
       variant="outlined"
@@ -32,11 +38,13 @@ export function CommandCategoryCard({ category, onCopyCommand }: CommandCategory
           </Typography>
           <Divider sx={{ borderColor: 'divider' }} />
           <List disablePadding>
-            {category.commands.map((item, index) => (
+            {category.commands.map((item, index) => {
+              const displayCommand = substituteCommand(item.command, snapshot);
+              return (
               <ListItem
                 key={item.command}
                 disableGutters
-                onClick={() => onCopyCommand(item.command)}
+                onClick={() => onCopyCommand(displayCommand)}
                 sx={{
                   py: 1.25,
                   borderBottom: index < category.commands.length - 1 ? '1px solid' : 'none',
@@ -59,7 +67,7 @@ export function CommandCategoryCard({ category, onCopyCommand }: CommandCategory
                         wordBreak: 'break-all',
                       }}
                     >
-                      {item.command}
+                      {displayCommand}
                     </Typography>
                   }
                   secondary={item.description}
@@ -68,10 +76,11 @@ export function CommandCategoryCard({ category, onCopyCommand }: CommandCategory
                   }}
                 />
               </ListItem>
-            ))}
+            );
+            })}
           </List>
         </Stack>
       </CardContent>
     </Card>
   );
-}
+});

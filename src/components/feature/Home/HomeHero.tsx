@@ -77,7 +77,13 @@ export const HomeHero = observer(function HomeHero() {
         </Stack>
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
           <Chip label="Scenario → Command" color="primary" size={isMobile ? 'small' : 'medium'} />
-          <Chip label="Command Palette" variant="outlined" size={isMobile ? 'small' : 'medium'} />
+          <Chip
+            label="Command Palette"
+            variant="outlined"
+            size={isMobile ? 'small' : 'medium'}
+            onClick={() => uiStore.openCommandPalette()}
+            sx={{ cursor: 'pointer' }}
+          />
           <Chip
             label={`快捷键 ${getKeyBindingDisplay('OPEN_COMMAND_PALETTE')}`}
             variant="outlined"

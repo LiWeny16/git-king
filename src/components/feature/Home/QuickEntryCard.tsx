@@ -1,9 +1,12 @@
 import { Card, CardContent, Paper, Stack, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import { getKeyBindingDisplay } from '../../../config/keymaps';
+import { useUIStore } from '../../../store';
 import { itemVariants } from './constants';
 
 export function QuickEntryCard() {
+  const uiStore = useUIStore();
+
   return (
     <motion.div variants={itemVariants}>
       <Card
@@ -20,7 +23,17 @@ export function QuickEntryCard() {
               使用命令面板进行模糊搜索，先按场景，再定位到具体指令。
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <Paper variant="outlined" sx={{ flex: 1, p: 2.5, borderRadius: 2 }}>
+              <Paper
+                variant="outlined"
+                sx={{
+                  flex: 1,
+                  p: 2.5,
+                  borderRadius: 2,
+                  cursor: 'pointer',
+                  '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' },
+                }}
+                onClick={() => uiStore.openCommandPalette()}
+              >
                 <Typography variant="h6" fontWeight={600}>
                   Command Palette
                 </Typography>

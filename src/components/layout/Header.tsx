@@ -1,6 +1,6 @@
-// Header - Sticky 毛玻璃顶栏 (specs/UIUX.md §2.2 z-index 1100)
+// Header - Sticky 顶栏 (specs/UIUX.md §2.2 z-index 1100)
 import { observer } from 'mobx-react-lite';
-import { AppBar, Box, IconButton, Toolbar, Typography, Tooltip, alpha } from '@mui/material';
+import { AppBar, Box, IconButton, Toolbar, Typography, Tooltip } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import SettingsIcon from '@mui/icons-material/Settings';
 import GitHubIcon from '@mui/icons-material/GitHub';
@@ -8,12 +8,12 @@ import { useUIStore } from '../../store';
 import { getKeyBindingDisplay } from '../../config/keymaps';
 import { Z_INDEX } from '../../app/constants';
 
+const HEADER_HEIGHT = 64; // 与 MUI Toolbar 默认一致，避免 div 与背景错位
+
 const CONFIG = {
-  height: 56,
+  height: HEADER_HEIGHT,
   logoText: 'Git King',
   logoEmoji: '👑',
-  // 毛玻璃: iOS 标准模糊 (specs/UIUX.md §1.2)
-  backdropBlur: 'blur(20px) saturate(180%)',
 };
 
 export const Header = observer(function Header() {
@@ -24,19 +24,23 @@ export const Header = observer(function Header() {
       position="fixed"
       elevation={0}
       sx={{
-        height: CONFIG.height,
+        height: HEADER_HEIGHT,
+        minHeight: HEADER_HEIGHT,
         zIndex: Z_INDEX.STICKY_HEADER,
-        bgcolor: (theme) => alpha(theme.palette.background.paper, 0.72),
-        backdropFilter: CONFIG.backdropBlur,
-        WebkitBackdropFilter: CONFIG.backdropBlur,
+        bgcolor: 'background.paper',
         borderBottom: '1px solid',
         borderColor: 'divider',
       }}
     >
       <Toolbar
+        disableGutters
         sx={{
-          height: '100%',
+          height: HEADER_HEIGHT,
+          minHeight: HEADER_HEIGHT,
+          maxHeight: HEADER_HEIGHT,
           px: { xs: 2, md: 3 },
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'space-between',
         }}
       >

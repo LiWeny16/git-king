@@ -27,6 +27,20 @@ export class UIStore {
   // Deep link: 选中 Scenario 后高亮并滚动到的卡片 id (workflow id)
   highlightScenarioId: string | null = null;
 
+  // 场景配置弹窗：当前打开的 workflow id，null 表示关闭
+  workflowConfigWorkflowId: string | null = null;
+
+  // 全局命令解释浮层（无遮罩）：悬停 1s 或点击 (i) 触发
+  commandExplanation: {
+    command: string;
+    explanation: string;
+    variables?: string[];
+    optional?: boolean;
+    dangerous?: boolean;
+    anchor: { x: number; y: number };
+    openBy: 'hover' | 'click';
+  } | null = null;
+
   constructor() {
     makeAutoObservable(this);
   }
@@ -131,6 +145,36 @@ export class UIStore {
     this.highlightScenarioId = null;
   }
 
+  openWorkflowConfig(workflowId: string) {
+    this.workflowConfigWorkflowId = workflowId;
+  }
+
+  closeWorkflowConfig() {
+    this.workflowConfigWorkflowId = null;
+  }
+
+  showCommandExplanation(data: {
+    command: string;
+    explanation: string;
+    variables?: string[];
+    optional?: boolean;
+    dangerous?: boolean;
+    anchor: { x: number; y: number };
+    openBy: 'hover' | 'click';
+  }) {
+    this.commandExplanation = data;
+  }
+
+  hideCommandExplanation() {
+    this.commandExplanation = null;
+  }
+
+  hideCommandExplanationIfFromHover() {
+    if (this.commandExplanation?.openBy === 'hover') {
+      this.commandExplanation = null;
+    }
+  }
+
   // Reset all UI state
   reset() {
     this.isCommandPaletteOpen = false;
@@ -141,6 +185,8 @@ export class UIStore {
     this.loadingMessage = '';
     this.showToast = false;
     this.highlightScenarioId = null;
+    this.workflowConfigWorkflowId = null;
+    this.commandExplanation = null;
   }
 }
 
